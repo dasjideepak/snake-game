@@ -1,22 +1,18 @@
 import { useState, useEffect } from 'react';
 import {
-  keyCode,
   directions,
-  initialSnakeDots,
+  keyCode,
   initalSnakeSpeed,
   defaultSnakeDirection,
+  initialSnakeDots,
 } from './constants';
 
 export default function App() {
-  const initialState = {
-    isPlaying: false,
-    snakeDots: [...initialSnakeDots],
-    snakeDirection: defaultSnakeDirection,
-    snakeSpeed: initalSnakeSpeed,
-    food: [],
-  };
-
-  const [store, setStore] = useState({ ...initialState });
+  const [snakeDots, setSnakeDots] = useState([...initialSnakeDots]);
+  const [food, setFood] = useState([]);
+  const [snakeDirection, setSnakeDirection] = useState(defaultSnakeDirection);
+  const [snakeSpeed, setSnakeSpeed] = useState(initalSnakeSpeed);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     getRandomCoordinatesForFood();
@@ -26,51 +22,51 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (store.isPlaying) {
-      const interval = setInterval(() => handleMoveSnake(), store.snakeSpeed);
+    if (isPlaying) {
+      const interval = setInterval(() => handleMoveSnake(), snakeSpeed);
       return () => clearInterval(interval);
     }
-  }, [store.snakeDots, store.isPlaying]);
+  }, [snakeDots, isPlaying]);
 
   useEffect(() => {
     handleEndGameOnBorderTouch();
     handleSnakeCollapse();
     handleFoodConsumption();
-  }, [store.snakeDots]);
+  }, [snakeDots]);
 
   function getRandomCoordinatesForFood() {
     const max = 98;
     const x = Math.floor((Math.random() * max) / 2) * 2;
     const y = Math.floor((Math.random() * max) / 2) * 2;
-    setStore({ ...store, food: [x, y] });
+    setFood([x, y]);
   }
 
   function handleSnakeDirection(e) {
-    switch (true) {
-      case e.keyCode === keyCode.LEFT:
-        setStore({ ...store, snakeDirection: directions.LEFT });
+    switch (e.keyCode) {
+      case keyCode.LEFT:
+        setSnakeDirection(directions.LEFT);
         break;
-      case e.keyCode === keyCode.UP:
-        setStore({ ...store, snakeDirection: directions.UP });
+      case keyCode.UP:
+        setSnakeDirection(directions.UP);
         break;
-      case e.keyCode === keyCode.RIGHT:
-        setStore({ ...store, snakeDirection: directions.RIGHT });
+      case keyCode.RIGHT:
+        setSnakeDirection(directions.RIGHT);
         break;
-      case e.keyCode === keyCode.DOWN:
-        setStore({ ...store, snakeDirection: directions.DOWN });
+      case keyCode.DOWN:
+        setSnakeDirection(directions.DOWN);
         break;
     }
   }
 
   function handleGamePlayAndPause() {
-    setStore({ ...store, isPlaying: !store.isPlaying });
+    setIsPlaying(!isPlaying);
   }
 
   function handleMoveSnake() {
-    let dots = [...store.snakeDots];
+    let dots = [...snakeDots];
     let snakeHead = dots[dots.length - 1];
 
-    switch (store.snakeDirection) {
+    switch (snakeDirection) {
       case directions.RIGHT:
         snakeHead = [snakeHead[0] + 2, snakeHead[1]];
         break;
@@ -87,11 +83,11 @@ export default function App() {
 
     dots.push(snakeHead);
     dots.shift();
-    setStore({ ...store, snakeDots: dots });
+    setSnakeDots(dots);
   }
 
   function handleEndGameOnBorderTouch() {
-    let snakeHead = store.snakeDots[store.snakeDots.length - 1];
+    let snakeHead = snakeDots[snakeDots.length - 1];
     if (
       snakeHead[0] > 100 ||
       snakeHead[0] < 0 ||
@@ -103,7 +99,7 @@ export default function App() {
   }
 
   function handleSnakeCollapse() {
-    let snake = [...store.snakeDots];
+    let snake = [...snakeDots];
     let head = snake[snake.length - 1];
     snake.pop();
 
@@ -116,43 +112,43 @@ export default function App() {
 
   function handleGameOver() {
     alert('Game Over');
-    setStore({ ...initialState });
+
+    setSnakeDots([...initalSnakeSpeed]);
+    getRandomCoordinatesForFood();
+    setIsPlaying(false);
+    setSnakeSpeed(initalSnakeSpeed);
+    setSnakeDirection('RIGHT');
   }
 
   function handleFoodConsumption() {
-    let head = store.snakeDots[store.snakeDots.length - 1];
-    if (head[0] === store.food[0] && head[1] === store.food[1]) {
+    let head = snakeDots[snakeDots.length - 1];
+    if (head[0] === food[0] && head[1] === food[1]) {
       getRandomCoordinatesForFood();
       handleSnakeLengthIncrement();
-      setStore({
-        ...store,
-        snakeSpeed:
-          store.snakeSpeed > 20 ? store.snakeSpeed - 10 : store.snakeSpeed,
-      });
+      setSnakeSpeed(snakeSpeed > 20 ? snakeSpeed - 10 : snakeSpeed);
     }
   }
 
   function handleSnakeLengthIncrement() {
-    const copyOfSnake = [...store.snakeDots];
+    const copyOfSnake = [...snakeDots];
     copyOfSnake.unshift([]);
-    setStore({ ...store, snakeDots: copyOfSnake });
+    setSnakeDots(copyOfSnake);
   }
 
   return (
     <>
       <div className="container">
         <h1>Snake Game</h1>
-        {console.log(store, 'store')}
         <button onClick={handleGamePlayAndPause}>
-          {store.isPlaying ? 'Pause' : 'Play'}
+          {isPlaying ? 'Pause' : 'Play'}
         </button>
       </div>
       <div className="board">
-        {store.snakeDots.map((el, index) => {
+        {snakeDots.map((el, index) => {
           return (
             <div
-              key={index}
               className="snake-dot"
+              key={index}
               style={{
                 top: el[1] + '%',
                 left: el[0] + '%',
@@ -162,8 +158,8 @@ export default function App() {
         <div
           className="food-dot"
           style={{
-            top: store.food[1] + '%',
-            left: store.food[0] + '%',
+            top: food[1] + '%',
+            left: food[0] + '%',
           }}></div>
       </div>
     </>
