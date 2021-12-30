@@ -19,6 +19,7 @@
   "plugins": ["react"],
   "rules": {
     "react/react-in-jsx-scope": "off",
-    "quotes": [2, "single"]
+    "quotes": [2, "single"],
+    "comma-dangle": ["error", "only-multiline"]
   }
 }
